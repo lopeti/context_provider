@@ -1,0 +1,24 @@
+# Python-related
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files
+.env
+*.env
+
+# Logs
+*.log
+
+# Home Assistant specific
+/config/
+*.db
+*.db-shm
+*.db-wal
+
+# Custom components cache
+custom_components/__pycache__/
+
+# facts data directory
+facts/
