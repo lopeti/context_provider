@@ -1,0 +1,15 @@
+- Két független áramkör:
+  1. **Nappali áramkör**: napelem és akkumulátor, klímák nem használhatják. Ide kapcsolódik az okosmérő.
+  2. **H tarifás áramkör**: csak a klímák használhatják. Külön "H tarifás mérőóra" méri a fogyasztást.
+- A két áramkör egymástól fizikailag el van választva, ezért például a klíma nem tud a napelemről működni.
+- **Hibrid napelem rendszer**:
+  - SOLOAX rendszer, 4.92 kWp teljesítmény, 12 db 410 W-os panel. A dőlési szöge 10.5 fok.
+  - Az "erőmű" az előtérben van. Itt található az inverter és a napelem akkumulátora.
+  - Az akkumulátorban még eltárolható energiát a "SolaX Inverter Chargeable Battery Capacity" mutatja. 0-nál már nem fér több energia az akkumulátorba.
+  - Az akkumulátor maximális kapacitása: 11 520 Wh.
+  - Az akkumulátorból még kinyerhető energiát a "SolaX Inverter Remaining Battery Capacity" szenzor mutatja. A vésztartalék értéke: 2 304 Wh.
+  - A vésztartalék energia %-os értékét "SolaX Inverter Selfuse Discharge Min SOC" vezérli.
+  - Számítási módok:
+    - Feltöltési idő órában = "SolaX Inverter Chargeable Battery Capacity" / "SolaX Inverter Battery Power Charge"
+    - Lemerülési idő órában = "SolaX Inverter Remaining Battery Capacity" / "SolaX Inverter Battery Power Charge"
+  - Az inverter 5kW-os, legfeljebb ekkora fogyasztást tud ellátni.

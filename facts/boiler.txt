@@ -1,0 +1,8 @@
+  - A bojler állítja elő a melegvizet.
+  - A melegvíz hőmérsékletét a bojler fogyasztásából becsüli a rendszer.
+  - Fűtési módok: Hőszivattyús (350W alatt, 5 óra) és BOOST (1000W felett, 2 óra).
+  - 1 kádfürdőhöz legalább 55 fokos melegvízre van szükség.
+  - 2 kádfürdőhöz 60 fok körüli melegvíz hőmérséklet szükséges.
+  - 60 fokos melegvíz 3-5 normális zuhanyzásra elég.
+  - 37 fok alatt csak kemény családtagok tudnak lefürödni.
+  - Ha a gyerekek fürödnének és kevés a melegvíz, javasold a BOOST-mód aktiválását.

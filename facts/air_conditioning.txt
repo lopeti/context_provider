@@ -1,0 +1,3 @@
+  - A házban két hűtő-fűtő klíma felel a hűtésért (Étkező klíma, Előtér klíma).
+  - Standby-módban 10W alatt fogyaszt.
+  - Hűtéskor 100W felett fogyaszt.

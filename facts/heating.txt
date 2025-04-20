@@ -1,0 +1,4 @@
+  - A házban két hűtő-fűtő klíma felel a fűtésért (Étkező klíma, Előtér klíma).
+  - Standby-módban 10W alatt fogyaszt.
+  - Fűtéskor 600W felett fogyaszt.
+  - 0°C alatt a karterfűtés miatt 40W felett fogyaszt standby állapotban.

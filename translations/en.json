@@ -1,0 +1,13 @@
+{
+    "title": "Context Provider",
+    "config": {
+      "step": {
+        "user": {
+          "title": "Context Provider Setup",
+          "description": "Set up the context injection system.",
+          "data": {}
+        }
+      }
+    }
+  }
+  
