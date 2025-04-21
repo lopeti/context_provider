@@ -1,8 +1,0 @@
-#### **VOC index (Volatile Organic Compound):**
-- 1–100: tiszta levegő, javuló levegőminőség (az elmúlt 24 óra átlagához képest alacsonyabb VOC szint)
-- 100: alapérték, az elmúlt 24 óra átlagos VOC szintje
-- 101–199: enyhe növekedés
-- 200–249: mérsékelt növekedés
-- 250–349: jelentős növekedés
-- 350–500: súlyos növekedés
-- 500+: kritikus szint

@@ -20,5 +20,8 @@ __pycache__/
 # Custom components cache
 custom_components/__pycache__/
 
-# facts data directory
-facts/
+# Ignore the custom facts directory
+custom_facts/
+
+data/topic_aliases_custom.yaml
+rendered_topics.md

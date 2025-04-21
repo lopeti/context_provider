@@ -1,92 +1,89 @@
 import os
+import yaml
 
-FACTS_DIR = os.path.join(
-    os.path.dirname(__file__), "..", "facts"
-)
+_cached_aliases = None
 
-TOPIC_ALIASES = {
-    "bojler": "boiler",
-    "fűtés": "heating",
-    "klíma": "air_conditioning",
-    "energia": "energy",
-    "levegő": "air_quality",
-}
 
-def resolve_topic_alias(topic: str) -> str:
-    return TOPIC_ALIASES.get(topic.lower(), topic.lower())
+def load_topic_metadata() -> dict:
+    """Load built-in + custom topic aliases and merge them."""
+    global _cached_aliases
+    if _cached_aliases is not None:
+        return _cached_aliases
 
-def available_topics() -> list[str]:
-    """List available chunk topics (filenames without .txt)"""
-    return [
-        f[:-4].lower()
-        for f in os.listdir(FACTS_DIR)
-        if f.endswith(".txt")
-    ]
+    base_path = os.path.join(os.path.dirname(__file__), "..", "data", "topic_aliases.yaml")
+    custom_path = os.path.join(os.path.dirname(__file__), "..", "data", "topic_aliases_custom.yaml")
 
-def fuzzy_match_topic_name(query: str) -> str | None:
-    """Fuzzy match on topic name (filename)"""
-    query = query.lower()
-    for topic in available_topics():
-        if query in topic:
-            return topic
+    base = {}
+    custom = {}
+
+    try:
+        with open(base_path, "r", encoding="utf-8") as f:
+            base = yaml.safe_load(f) or {}
+    except Exception:
+        pass
+
+    try:
+        with open(custom_path, "r", encoding="utf-8") as f:
+            custom = yaml.safe_load(f) or {}
+    except Exception:
+        pass
+
+    merged = {**base, **custom}
+    _cached_aliases = merged
+    return merged
+
+
+def resolve_topic_alias(input_topic: str) -> str:
+    input_topic = input_topic.lower()
+    metadata = load_topic_metadata()
+
+    if input_topic in metadata:
+        return input_topic
+
+    for canonical, info in metadata.items():
+        aliases = info.get("aliases", [])
+        if input_topic in [a.lower() for a in aliases]:
+            return canonical
+
+    return input_topic
+
+
+def search_topic_file(topic: str) -> str | None:
+    """Search for the topic in custom_facts and facts folder."""
+    base_dir = os.path.dirname(__file__)
+    folders = ["../custom_facts", "../facts"]
+    for folder in folders:
+        file_path = os.path.join(base_dir, folder, f"{topic}.txt")
+        if os.path.isfile(file_path):
+            return file_path
     return None
 
-def fuzzy_match_by_content(query: str) -> str | None:
-    """Fuzzy match on chunk content if name match fails"""
-    query = query.lower()
-    for topic in available_topics():
-        path = os.path.join(FACTS_DIR, f"{topic}.txt")
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                content = f.read().lower()
-                if query in content:
-                    return topic
-        except Exception:
-            continue
-    return None
 
-def load_topic(topic: str) -> dict | None:
+def load_topic(input_topic: str) -> dict | None:
     """
-    Load a topic chunk from file.
-    Returns: dict {content, match_type, resolved_topic}
+    Load topic content with metadata:
+    - match_type: exact | alias
+    - resolved_topic: canonical name
+    - content: file content
     """
-    original = topic
-    resolved = resolve_topic_alias(topic)
-    path = os.path.join(FACTS_DIR, f"{resolved}.txt")
+    input_topic = input_topic.lower()
+    resolved_topic = resolve_topic_alias(input_topic)
+    match_type = "exact" if input_topic == resolved_topic else "alias"
 
-    if os.path.isfile(path):
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return {
-                    "content": f.read(),
-                    "match_type": "alias" if resolved != original else "exact",
-                    "resolved_topic": resolved
-                }
-        except Exception:
-            return None
+    file_path = search_topic_file(resolved_topic)
+    if not file_path:
+        return None
 
-    # 🔍 1. próbáljunk fuzzy fájlnév szerint
-    fuzzy = fuzzy_match_topic_name(topic)
-    if fuzzy:
-        return _load_as_fuzzy(fuzzy)
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
 
-    # 🔍 2. próbáljunk tartalom alapján
-    fuzzy = fuzzy_match_by_content(topic)
-    if fuzzy:
-        return _load_as_fuzzy(fuzzy)
+        return {
+            "resolved_topic": resolved_topic,
+            "match_type": match_type,
+            "content": content,
+        }
+    except Exception:
+        return None
 
-    return None
 
-def _load_as_fuzzy(topic: str) -> dict | None:
-    path = os.path.join(FACTS_DIR, f"{topic}.txt")
-    if os.path.isfile(path):
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return {
-                    "content": f.read(),
-                    "match_type": "fuzzy",
-                    "resolved_topic": topic
-                }
-        except Exception:
-            return None
-    return None
