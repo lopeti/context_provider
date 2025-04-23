@@ -30,9 +30,7 @@ async def async_setup_entry(hass, entry):
     write_rendered_topics_md(prompt_context.get("topics", {}))
 
     # Forward setup to the sensor platform
-    hass.async_create_task(
-        hass.config_entries.async_forward_entry_setup(entry, "sensor")
-    )
+    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     return True
 
@@ -56,3 +54,9 @@ async def async_reload_entry(hass, entry):
     _LOGGER.info("Reloading context_provider integration")
     await async_unload_entry(hass, entry)
     return await async_setup_entry(hass, entry)
+
+
+async def async_setup_intents(hass):
+    """Set up intents for the context_provider integration."""
+    _LOGGER.debug("Setting up intents for context_provider")
+    await async_register_intents(hass)

@@ -1,8 +1,19 @@
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+lib/
+lib64/
+
 # Python-related
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# VS Code
+.vscode/
 
 # Environment files
 .env
@@ -11,11 +22,14 @@ __pycache__/
 # Logs
 *.log
 
-# Home Assistant specific
-/config/
-*.db
+# Home Assistant database/logs/state
+home-assistant_v2.db*
+home-assistant.log*
 *.db-shm
 *.db-wal
+
+# Devcontainer extras
+.devcontainer/
 
 # Custom components cache
 custom_components/__pycache__/
