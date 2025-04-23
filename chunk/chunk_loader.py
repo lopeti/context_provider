@@ -1,10 +1,11 @@
 import os
 import yaml
+import asyncio
 
 _cached_aliases = None
 
 
-def load_topic_metadata() -> dict:
+async def load_topic_metadata() -> dict:
     """Load built-in + custom topic aliases and merge them."""
     global _cached_aliases
     if _cached_aliases is not None:
@@ -19,14 +20,16 @@ def load_topic_metadata() -> dict:
     custom = {}
 
     try:
-        with open(base_path, "r", encoding="utf-8") as f:
-            base = yaml.safe_load(f) or {}
+        base = await asyncio.get_running_loop().run_in_executor(
+            None, lambda: yaml.safe_load(open(base_path, "r", encoding="utf-8")) or {}
+        )
     except Exception:
         pass
 
     try:
-        with open(custom_path, "r", encoding="utf-8") as f:
-            custom = yaml.safe_load(f) or {}
+        custom = await asyncio.get_running_loop().run_in_executor(
+            None, lambda: yaml.safe_load(open(custom_path, "r", encoding="utf-8")) or {}
+        )
     except Exception:
         pass
 
@@ -35,9 +38,9 @@ def load_topic_metadata() -> dict:
     return merged
 
 
-def resolve_topic_alias(input_topic: str) -> str:
+async def resolve_topic_alias(input_topic: str) -> str:
     input_topic = input_topic.lower()
-    metadata = load_topic_metadata()
+    metadata = await load_topic_metadata()  # Use await instead of asyncio.run
 
     if input_topic in metadata:
         return input_topic
@@ -50,7 +53,7 @@ def resolve_topic_alias(input_topic: str) -> str:
     return input_topic
 
 
-def search_topic_file(topic: str) -> str | None:
+async def search_topic_file(topic: str) -> str | None:
     """Search for the topic in the data folders."""
     base_dir = os.path.dirname(__file__)
     folders = ["../data", "../data/custom"]
@@ -61,7 +64,7 @@ def search_topic_file(topic: str) -> str | None:
     return None
 
 
-def load_topic(input_topic: str) -> dict | None:
+async def load_topic(input_topic: str) -> dict | None:
     """
     Load topic content with metadata:
     - match_type: exact | alias
@@ -69,16 +72,17 @@ def load_topic(input_topic: str) -> dict | None:
     - content: file content
     """
     input_topic = input_topic.lower()
-    resolved_topic = resolve_topic_alias(input_topic)
+    resolved_topic = await resolve_topic_alias(input_topic)
     match_type = "exact" if input_topic == resolved_topic else "alias"
 
-    file_path = search_topic_file(resolved_topic)
+    file_path = await search_topic_file(resolved_topic)
     if not file_path:
         return None
 
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            content = f.read()
+        content = await asyncio.get_running_loop().run_in_executor(
+            None, lambda: open(file_path, "r", encoding="utf-8").read()
+        )
 
         return {
             "resolved_topic": resolved_topic,
@@ -87,3 +91,24 @@ def load_topic(input_topic: str) -> dict | None:
         }
     except Exception:
         return None
+
+
+async def load_all_topic_filenames() -> list[str]:
+    """Return a list of all topic file names (without extension)."""
+    base_dir = os.path.dirname(__file__)
+    folders = ["../data", "../data/custom"]
+    result = set()
+
+    for folder in folders:
+        folder_path = os.path.normpath(os.path.join(base_dir, folder))
+        try:
+            files = await asyncio.get_running_loop().run_in_executor(
+                None, lambda: os.listdir(folder_path)
+            )
+            for f in files:
+                if f.endswith(".md"):
+                    result.add(f.replace(".md", ""))
+        except Exception:
+            continue
+
+    return sorted(result)

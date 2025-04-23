@@ -1,4 +1,6 @@
 import os
+import asyncio
+
 
 def render_topics_markdown(topics: dict) -> str:
     """Render the topic list as a markdown document."""
@@ -11,7 +13,7 @@ def render_topics_markdown(topics: dict) -> str:
     return "\n".join(lines)
 
 
-def write_rendered_topics_md(topics: dict, output_path: str | None = None):
+async def write_rendered_topics_md(topics: dict, output_path: str | None = None):
     """Write the rendered markdown to a file."""
     if output_path is None:
         base_dir = os.path.dirname(__file__)
@@ -20,8 +22,9 @@ def write_rendered_topics_md(topics: dict, output_path: str | None = None):
     markdown = render_topics_markdown(topics)
 
     try:
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(markdown)
+        await asyncio.get_running_loop().run_in_executor(
+            None, lambda: open(output_path, "w", encoding="utf-8").write(markdown)
+        )
     except Exception as e:
         # Silent fail for production
         print(f"⚠️ Could not write rendered_topics.md: {e}")

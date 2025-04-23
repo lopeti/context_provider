@@ -16,11 +16,10 @@ from ..helpers.intent_helpers import (
     slot_or_fallback,
 )
 
+
 class ProvideTopicFactsIntent(IntentHandler):
     intent_type = "ProvideTopicFacts"
-    slot_schema = {
-        "topic": SLOT_SCHEMA_STR
-    }
+    slot_schema = {"topic": SLOT_SCHEMA_STR}
 
     async def async_handle(self, intent_obj):
         hass: HomeAssistant = intent_obj.hass
@@ -32,12 +31,10 @@ class ProvideTopicFactsIntent(IntentHandler):
 
         topic = normalize_topic(topic_slot)
 
-        result = load_topic(topic)
+        result = await load_topic(topic)
         if result is None:
             return response_error(
-                intent_obj,
-                "not_found",
-                f"Nincs tudásom a(z) {topic_slot} témáról."
+                intent_obj, "not_found", f"Nincs tudásom a(z) {topic_slot} témáról."
             )
 
         content = result["content"]
@@ -48,12 +45,12 @@ class ProvideTopicFactsIntent(IntentHandler):
         if match_type == "fuzzy":
             return response_with_text(
                 intent_obj,
-                f"A témát a „{resolved}” fájl alapján töltöttem be, mert hasonlónak tűnt. {content}"
+                f"A témát a „{resolved}” fájl alapján töltöttem be, mert hasonlónak tűnt. {content}",
             )
         elif match_type == "alias":
             return response_with_text(
                 intent_obj,
-                f"A(z) „{topic_slot}” ismert alias a „{resolved}” témához. {content}"
+                f"A(z) „{topic_slot}” ismert alias a „{resolved}” témához. {content}",
             )
         else:
             return response_with_text(intent_obj, content)

@@ -1,6 +1,7 @@
 from homeassistant.helpers.intent import IntentHandler, async_register
 from .provide_topic_facts import ProvideTopicFactsIntent
-
+from .list_topics import ListTopicsIntent  # Import ListTopicsIntent from its module
+from .write_topic import WriteTopicIntent
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -20,6 +21,9 @@ async def async_register_intents(hass):
     _LOGGER.debug("Registering intents")
     # async_register(hass, DummyIntent())
     async_register(hass, ProvideTopicFactsIntent())
+    async_register(hass, ListTopicsIntent())
+    async_register(hass, WriteTopicIntent())
+    _LOGGER.debug("Intents registered successfully")
 
 
 async def async_setup_intents(hass):

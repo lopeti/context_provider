@@ -11,5 +11,5 @@
     "translations": ["en"],
     "icon": "icon.png",
     "supported_platforms": ["sensor"]
-  }
-  
+
+}
