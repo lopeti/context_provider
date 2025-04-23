@@ -10,8 +10,10 @@ def load_topic_metadata() -> dict:
     if _cached_aliases is not None:
         return _cached_aliases
 
-    base_path = os.path.join(os.path.dirname(__file__), "..", "data", "topic_aliases.yaml")
-    custom_path = os.path.join(os.path.dirname(__file__), "..", "data", "topic_aliases_custom.yaml")
+    base_path = os.path.join(os.path.dirname(__file__), "..", "data", "topics.yaml")
+    custom_path = os.path.join(
+        os.path.dirname(__file__), "..", "data", "custom/topics.yaml"
+    )
 
     base = {}
     custom = {}
@@ -49,11 +51,11 @@ def resolve_topic_alias(input_topic: str) -> str:
 
 
 def search_topic_file(topic: str) -> str | None:
-    """Search for the topic in custom_facts and facts folder."""
+    """Search for the topic in the data folders."""
     base_dir = os.path.dirname(__file__)
-    folders = ["../custom_facts", "../facts"]
+    folders = ["../data", "../data/custom"]
     for folder in folders:
-        file_path = os.path.join(base_dir, folder, f"{topic}.txt")
+        file_path = os.path.join(base_dir, folder, f"{topic}.md")
         if os.path.isfile(file_path):
             return file_path
     return None
@@ -85,5 +87,3 @@ def load_topic(input_topic: str) -> dict | None:
         }
     except Exception:
         return None
-
-
