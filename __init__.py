@@ -1,17 +1,20 @@
 import logging
-import shutil
+
+from homeassistant.components import panel_custom
+from homeassistant.components.http import StaticPathConfig
+
 from .intent import async_register_intents
 from .const import DOMAIN
 from .prompt_builder import build_prompt_context
-from .utils.rendered_output import write_rendered_topics_md
-from homeassistant.components import panel_custom
-from homeassistant.components.http import StaticPathConfig
+from .helpers.rendered_output import write_rendered_topics_md
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup(hass, config):
     """Set up the context_provider integration."""
+
+    # (Ha újra aktiválnád a panel_custom-ot, ez itt van kikommentezve.)
     # await panel_custom.async_register_panel(
     #     hass=hass,
     #     frontend_url_path="topic-editor",
@@ -21,7 +24,7 @@ async def async_setup(hass, config):
     #     module_url="/api/context_provider/static/topic_editor.js?v=6",
     #     require_admin=False,
     # )
-    # _LOGGER.debug("Registering static path for topic_editor.js")
+
     # await hass.http.async_register_static_paths(
     #     [
     #         StaticPathConfig(
@@ -34,7 +37,6 @@ async def async_setup(hass, config):
     #     ]
     # )
 
-    # _LOGGER.debug("Static path registered successfully")
     return True
 
 
@@ -42,20 +44,21 @@ async def async_setup_entry(hass, entry):
     """Set up a config entry for context_provider."""
     _LOGGER.info("Setting up context_provider entry")
 
-    # Register intents
+    # ⬇️ Intents regisztrálása
     await async_register_intents(hass)
 
-    # Build dynamic context for prompt rendering
+    # ⬇️ Kontextus összeállítása (témák + metaadatok a frontmatter-ből)
     prompt_context = await build_prompt_context()
 
-    # Store data in hass.data
+    # ⬇️ Elmentjük a prompt contextet a Home Assistant data store-ba
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN]["prompt_context"] = prompt_context
     hass.data[DOMAIN][entry.entry_id] = entry.data
-    # Save markdown file
+
+    # ⬇️ Renderelt context Markdown exportálása (opcionális)
     await write_rendered_topics_md(prompt_context.get("topics", {}))
 
-    # Forward setup to the sensor platform
+    # ⬇️ Platform regisztrálása (jelenleg csak sensor)
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     return True
@@ -68,7 +71,6 @@ async def async_unload_entry(hass, entry):
     await hass.config_entries.async_forward_entry_unload(entry, "sensor")
     hass.data[DOMAIN].pop(entry.entry_id, None)
 
-    # Cleanup if no more entries left
     if not hass.data[DOMAIN]:
         hass.data.pop(DOMAIN)
 

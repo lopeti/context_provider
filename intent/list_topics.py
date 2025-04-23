@@ -3,7 +3,7 @@
 from homeassistant.helpers.intent import IntentHandler
 from homeassistant.core import HomeAssistant
 from ..helpers.intent_helpers import response_with_text
-from ..chunk.chunk_loader import load_all_topic_filenames  # Ezt külön írd meg
+from ..helpers.chunk_loader import load_all_topic_filenames  # Ezt külön írd meg
 
 
 class ListTopicsIntent(IntentHandler):

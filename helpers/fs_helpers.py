@@ -1,5 +1,6 @@
 import os
 
+
 def safe_write_topic_file(file_path: str, content: str):
     """Safely writes the topic content to the specified file."""
     if ".." in os.path.normpath(file_path):

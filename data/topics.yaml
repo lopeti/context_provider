@@ -1,5 +1,0 @@
-about_context_provider:
-  aliases: ["context provider", "mi ez", "asszisztens", "ki vagy", "mit tudsz"]
-  label: "Context Provider bemutatkozás"
-  tags: ["meta", "intro", "önreflektív"]
-  language: "hu"

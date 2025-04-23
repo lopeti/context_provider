@@ -7,7 +7,7 @@ import os
 from homeassistant.helpers.intent import IntentHandler
 from homeassistant.core import HomeAssistant
 from ..const import DOMAIN
-from ..chunk.chunk_loader import load_topic  # Advanced loader with match info
+from ..helpers.chunk_loader import load_topic  # Advanced loader with match info
 from ..helpers.intent_helpers import (
     SLOT_SCHEMA_STR,
     response_with_text,
