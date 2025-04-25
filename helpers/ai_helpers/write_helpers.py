@@ -2,7 +2,8 @@
 
 from aiohttp import ClientSession
 from homeassistant.core import HomeAssistant
-from .markdown_utils import split_frontmatter
+from ..markdown_utils import split_frontmatter
+from ...helpers.markdown_fix import validate_and_fix_topic_text
 
 
 async def rewrite_topic_file_with_ai(
@@ -17,7 +18,7 @@ async def rewrite_topic_file_with_ai(
     prompt = f"""
 You are a knowledge assistant managing structured Markdown topic files.
 
-Each file starts with a **YAML frontmatter block** containing metadata (like `aliases`, `tags`, and `label`), followed by a **bullet-point list of factual information** in Hungarian.
+Each file starts with a **YAML frontmatter block** containing metadata (`summary` and `keywords`), followed by a **bullet-point list of factual information** in Hungarian.
 
 Your job is to intelligently integrate a newly received fact into the topic file, ensuring:
 
@@ -32,36 +33,18 @@ Your job is to intelligently integrate a newly received fact into the topic file
 
 💡 You **must always** include or create a valid frontmatter block with the following fields:
 
----
-aliases:
-  - alternative names (in Hungarian)
-tags:
-  - short categorical keywords
-label: "Human-friendly title of the topic"
-language: hu
----
+- `summary`: a one-sentence summary (in Hungarian) describing the scope of the file.
+- `keywords`: a short list of important keywords (Hungarian), each on its own line.
 
-If the file has no frontmatter, create one from scratch.
+Use expanded YAML format:
+✅ GOOD:
+  keywords:
+    - bojler
+    - melegvíz
 
-Always use expanded YAML syntax (avoid [tag1, tag2] style).
+⛔️ BAD:
+  keywords: [bojler, melegvíz]
 
-Derive aliases from known synonyms or variations of the topic name.
-
-Derive tags from general categories or functions mentioned in the facts.
-
-The language must be "hu" unless instructed otherwise.
-
-Example frontmatter:
-
----
-aliases:
-  - bojler
-  - vízmelegítő
-tags:
-  - melegvíz
-  - fűtés
-label: "Bojler működése"
-language: hu
 ---
 
 🧾 FACT INTEGRATION RULES
@@ -85,7 +68,6 @@ Return the full and updated Markdown content, including:
 A valid and structured YAML frontmatter block
 
 A bullet list of facts (in Hungarian)
-
 """
 
     # 🔑 Load API key from hass.data
@@ -109,7 +91,8 @@ A bullet list of facts (in Hungarian)
                     )
 
                 data = await response.json()
-                return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+                raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
+                return validate_and_fix_topic_text(raw_text)
 
         except Exception as e:
             raise RuntimeError(f"Failed to call Google AI: {e}") from e

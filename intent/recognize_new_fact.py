@@ -4,6 +4,8 @@ import asyncio
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.intent import IntentHandler
 
+from ..prompt_builder import build_prompt_context
+
 from ..helpers.intent_helpers import (
     response_with_text,
     response_error,
@@ -12,7 +14,7 @@ from ..helpers.intent_helpers import (
 )
 
 from ..helpers.chunk_loader import load_topic, search_topic_file
-from ..helpers.write_helpers import rewrite_topic_file_with_ai
+from ..helpers.ai_helpers.write_helpers import rewrite_topic_file_with_ai
 from ..helpers.fs_helpers import safe_write_topic_file
 
 
@@ -68,6 +70,10 @@ class RecognizeNewFactIntent(IntentHandler):
                 if updated.endswith("```"):
                     updated = updated.removesuffix("```").strip()
             safe_write_topic_file(path, updated)
+
+            # refresh prompt context
+            prompt_context = await build_prompt_context()
+            hass.data["context_provider"]["prompt_context"] = prompt_context
             return response_with_text(
                 intent_obj, f"Topic '{topic}' was successfully updated."
             )

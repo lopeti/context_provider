@@ -42,3 +42,14 @@ async def load_topic_meta(topic: str) -> dict | None:
         return None
     else:
         return meta
+
+
+async def load_topic_summary_keywords(topic: str) -> tuple[str, list[str]] | None:
+    """Return the summary and keywords from a topic frontmatter."""
+    meta = await load_topic_meta(topic)
+    if not meta:
+        return None
+
+    summary = meta.get("summary", "").strip()
+    keywords = meta.get("keywords", [])
+    return summary, keywords

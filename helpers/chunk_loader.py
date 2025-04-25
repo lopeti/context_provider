@@ -1,4 +1,4 @@
-"""Module for loading and resolving topics with metadata."""
+"""Module for loading and resolving topics with metadata (summary + keywords only)."""
 
 import asyncio
 import os
@@ -7,17 +7,16 @@ from typing import Optional
 from .markdown_utils import split_frontmatter
 from .async_file_io import async_read_file
 
-_alias_cache: dict[str, str] | None = None
+_keyword_cache: dict[str, str] | None = None
 
 
-async def build_alias_index() -> dict[str, str]:
-    """Build alias -> canonical topic name index from frontmatter."""
-    global _alias_cache
-    if _alias_cache is not None:
-        return _alias_cache
+async def build_keyword_index() -> dict[str, str]:
+    """Build keyword -> canonical topic name index from frontmatter."""
+    global _keyword_cache
+    if _keyword_cache is not None:
+        return _keyword_cache
 
     index: dict[str, str] = {}
-
     topic_names = await load_all_topic_filenames()
 
     for topic in topic_names:
@@ -28,82 +27,42 @@ async def build_alias_index() -> dict[str, str]:
         try:
             full_content = await async_read_file(path)
             meta, _ = split_frontmatter(full_content)
-            aliases = meta.get("aliases", [])
-
-            # Add canonical name and aliases
-            index[topic.lower()] = topic
-            for alias in aliases:
-                index[alias.lower()] = topic
+            keywords = meta.get("keywords", [])
+            for keyword in keywords:
+                index[keyword.strip().lower()] = topic
         except Exception:
             continue
 
-    _alias_cache = index
+    _keyword_cache = index
     return index
 
 
-async def resolve_topic_alias(input_topic: str) -> str:
-    index = await build_alias_index()
-    return index.get(input_topic.lower(), input_topic)
+async def resolve_topic_by_keyword(input_term: str) -> Optional[str]:
+    """Try to resolve a topic name by keyword matching."""
+    index = await build_keyword_index()
+    return index.get(input_term.strip().lower())
 
 
 async def load_topic(input_topic: str) -> Optional[dict]:
     """
     Load topic content with metadata:
-    - match_type: exact | alias
-    - resolved_topic: canonical name
-    - content: full content (minus frontmatter)
-    """
-    topic_key = input_topic.lower()
-    alias_index = await build_alias_index()
-
-    resolved_topic = alias_index.get(topic_key, topic_key)
-    match_type = (
-        "exact"
-        if topic_key == resolved_topic.lower()
-        else "alias"
-        if topic_key in alias_index
-        else "unknown"
-    )
-
-    path = await search_topic_file(resolved_topic)
-    if not path:
-        return None
-
-    try:
-        full_content = await async_read_file(path)
-        _, content = split_frontmatter(full_content)
-
-        return {
-            "resolved_topic": resolved_topic,
-            "match_type": match_type,
-            "content": content,
-        }
-    except Exception:
-        return None
-
-
-async def load_topic(input_topic: str) -> Optional[dict]:
-    """
-    Load topic content with metadata:
-    - match_type: exact | alias
+    - match_type: exact | keyword | unknown
     - resolved_topic: canonical name
     - metadata: frontmatter metadata
     - content: full content (minus frontmatter)
-
-
-
     """
-    topic_key = input_topic.lower()
-    alias_index = await build_alias_index()
+    topic_key = input_topic.strip().lower()
+    topic_names = await load_all_topic_filenames()
 
-    resolved_topic = alias_index.get(topic_key, topic_key)
-    match_type = (
-        "exact"
-        if topic_key == resolved_topic.lower()
-        else "alias"
-        if topic_key in alias_index
-        else "unknown"
-    )
+    if topic_key in [t.lower() for t in topic_names]:
+        resolved_topic = topic_key
+        match_type = "exact"
+    else:
+        resolved_topic = await resolve_topic_by_keyword(topic_key)
+        match_type = "keyword" if resolved_topic else "unknown"
+
+    if not resolved_topic:
+        return None
 
     path = await search_topic_file(resolved_topic)
     if not path:
@@ -153,7 +112,7 @@ async def load_all_topic_filenames() -> list[str]:
     return sorted(result)
 
 
-def invalidate_alias_cache():
-    """Force rebuild of alias index."""
-    global _alias_cache
-    _alias_cache = None
+def invalidate_keyword_cache():
+    """Force rebuild of keyword index."""
+    global _keyword_cache
+    _keyword_cache = None

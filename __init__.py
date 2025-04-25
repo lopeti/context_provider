@@ -1,4 +1,7 @@
 import logging
+import os
+import shutil
+from pathlib import Path
 
 from homeassistant.components import panel_custom
 from homeassistant.components.http import StaticPathConfig
@@ -62,7 +65,8 @@ async def async_setup_entry(hass, entry):
 
     # ⬇️ Platform regisztrálása (jelenleg csak sensor)
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
-
+    # ➡️ Másoljuk a context_provider_prompt.jinja fájlt induláskor
+    await copy_prompt_template(hass)
     return True
 
 
@@ -90,3 +94,15 @@ async def async_setup_intents(hass):
     """Set up intents for the context_provider integration."""
     _LOGGER.debug("Setting up intents for context_provider")
     await async_register_intents(hass)
+
+
+async def copy_prompt_template(hass):
+    """Másolja a prompt Jinja sablont a Home Assistant custom_templates könyvtárába."""
+    source = (
+        Path(__file__).parent / "prompt_templates" / "context_provider_prompt.jinja"
+    )
+    target_dir = Path(hass.config.path("custom_templates"))
+    target_file = target_dir / "context_provider_prompt.jinja"
+
+    target_dir.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, target_file)

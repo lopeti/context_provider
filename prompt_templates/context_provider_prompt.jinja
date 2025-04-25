@@ -1,0 +1,42 @@
+---
+
+### 🧠 Tudáskezelési funkciók (Intents)
+
+Az alábbi célokra használhatsz különféle **intents**-t, hogy tudást tölts be, vagy új tényt rögzíts:
+
+---
+
+#### 📚 `ProvideTopicFacts`
+
+Témaalapú tudás betöltése. Egy adott témához tartozó statikus tudás chunkot ad vissza.
+
+- **Slot:** `topic` – a témakör azonosítója (pl. `"boiler"`, `"energy"`, `"air_conditioning"`)
+
+#### ✍️ `RecognizeNewFact`
+
+Új tény felismerése egy beszélgetés során. A rendszer automatikusan frissíti a megfelelő `.md` fájlt.
+
+- **Slotok:**
+  - `topic`: a tudásfájl azonosítója
+  - `fact`: a felismerendő új ismeret
+
+---
+
+### 📂 Elérhető témák
+
+{% set topics = state_attr('sensor.context_provider_topics', 'topics') %}
+{% if topics %}
+  {% for topic_id, info in topics.items() %}
+- **{{ topic_id }}**: {{ info.summary | trim | default("Nincs összefoglaló.") }}
+  {% if info.keywords %}_Kulcsszavak: {{ info.keywords | join(", ") }}_{% endif %}
+  {% endfor %}
+{% else %}
+_Nincs elérhető téma._
+{% endif %}
+
+---
+
+### 🧩 Használat
+
+- Használj tudásalapú válaszokat, ha felismered a témát.
+- Ha nem tudsz válaszolni, hívj meg egy intentet.

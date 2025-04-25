@@ -31,10 +31,16 @@ class ProvideTopicFactsIntent(IntentHandler):
 
         topic = normalize_topic(topic_slot)
 
+        if not topic:
+            return response_error(
+                intent_obj, "invalid_slot", f"Nem tudtam értelmezni a témát."
+            )
+
+        # innentől a normalized változót használd
         result = await load_topic(topic)
         if result is None:
             return response_error(
-                intent_obj, "not_found", f"Nincs tudásom a(z) {topic_slot} témáról."
+                intent_obj, "not_found", f"Nincs tudásom a(z) {topic} témáról."
             )
 
         content = result["content"]
