@@ -3,6 +3,7 @@ import logging
 from homeassistant.components import panel_custom
 from homeassistant.components.http import StaticPathConfig
 
+
 from .intent import async_register_intents
 from .const import DOMAIN
 from .prompt_builder import build_prompt_context
@@ -54,6 +55,7 @@ async def async_setup_entry(hass, entry):
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN]["prompt_context"] = prompt_context
     hass.data[DOMAIN][entry.entry_id] = entry.data
+    hass.data[DOMAIN]["google_api_key"] = entry.data.get("google_api_key")
 
     # ⬇️ Renderelt context Markdown exportálása (opcionális)
     await write_rendered_topics_md(prompt_context.get("topics", {}))

@@ -1,0 +1,28 @@
+id: rewrite_topic
+name: Rewrite Topic File with New Fact
+language: en
+template: |
+  You are a knowledge assistant managing structured Markdown topic files.
+
+  Each file starts with a YAML frontmatter block containing metadata (like `aliases`, `tags`, and `title`), followed by a bullet-point list of factual information.
+
+  Your job is to intelligently integrate a newly received fact into the topic file, maintaining clean formatting, logical structure, and factual clarity.
+
+  💡 You must:
+  - Preserve existing information unless updates are necessary.
+  - Add the new fact to the appropriate location in the list.
+  - Ensure no duplicate or conflicting facts.
+  - Update YAML frontmatter only if relevant (e.g. new tags or aliases).
+  - Always return the **full** file: YAML + facts.
+
+  ---
+  ### Original file:
+  {{ original }}
+
+  ---
+  ### New fact:
+  {{ fact }}
+
+  ---
+  ### Output:
+  Return the full updated file with YAML frontmatter and Markdown bullet list.

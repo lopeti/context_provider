@@ -5,7 +5,7 @@ import os
 from typing import Optional
 
 from .markdown_utils import split_frontmatter
-
+from .async_file_io import async_read_file
 
 _alias_cache: dict[str, str] | None = None
 
@@ -26,9 +26,7 @@ async def build_alias_index() -> dict[str, str]:
             continue
 
         try:
-            with open(path, "r", encoding="utf-8") as f:
-                full_content = f.read()
-
+            full_content = await async_read_file(path)
             meta, _ = split_frontmatter(full_content)
             aliases = meta.get("aliases", [])
 
@@ -72,14 +70,53 @@ async def load_topic(input_topic: str) -> Optional[dict]:
         return None
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            full_content = f.read()
-
+        full_content = await async_read_file(path)
         _, content = split_frontmatter(full_content)
 
         return {
             "resolved_topic": resolved_topic,
             "match_type": match_type,
+            "content": content,
+        }
+    except Exception:
+        return None
+
+
+async def load_topic(input_topic: str) -> Optional[dict]:
+    """
+    Load topic content with metadata:
+    - match_type: exact | alias
+    - resolved_topic: canonical name
+    - metadata: frontmatter metadata
+    - content: full content (minus frontmatter)
+
+
+
+    """
+    topic_key = input_topic.lower()
+    alias_index = await build_alias_index()
+
+    resolved_topic = alias_index.get(topic_key, topic_key)
+    match_type = (
+        "exact"
+        if topic_key == resolved_topic.lower()
+        else "alias"
+        if topic_key in alias_index
+        else "unknown"
+    )
+
+    path = await search_topic_file(resolved_topic)
+    if not path:
+        return None
+
+    try:
+        full_content = await async_read_file(path)
+        metadata, content = split_frontmatter(full_content)
+
+        return {
+            "resolved_topic": resolved_topic,
+            "match_type": match_type,
+            "metadata": metadata,
             "content": content,
         }
     except Exception:

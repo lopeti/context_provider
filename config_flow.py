@@ -45,14 +45,6 @@ class ContextProviderConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             # Create a ConfigEntry with the provided user input
             return self.async_create_entry(title="Context Provider", data=user_input)
 
-        # Show the form if no user input is provided
-        return self.async_show_form(
-            step_id="user",
-            data_schema=vol.Schema(
-                {vol.Required("test_option", default="default"): str}
-            ),
-        )
-
     async def async_step_options(self, user_input: dict | None = None) -> FlowResult:
         """Handle the options step of the config flow.
 
@@ -68,14 +60,6 @@ class ContextProviderConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # Update the options with the provided user input
             return self.async_create_entry(title="", data=user_input)
-
-        # Show the form if no user input is provided
-        return self.async_show_form(
-            step_id="options",
-            data_schema=vol.Schema(
-                {vol.Required("option_key", default="default_value"): str}
-            ),
-        )
 
     async def async_update_entry(
         self, hass: HomeAssistant, entry: config_entries.ConfigEntry
@@ -124,33 +108,25 @@ class ContextProviderOptionsFlowHandler(config_entries.OptionsFlow):
         self.config_entry = config_entry
 
     async def async_step_init(self, user_input: dict | None = None) -> FlowResult:
-        """Handle the initial step of the options flow.
-
-        This step is triggered when the user accesses the options for the integration.
-
-        Args:
-            user_input (dict | None): The user input provided during the step.
-
-        Returns:
-            FlowResult: The result of the options flow step.
-        """
+        """Handle the initial step of the options flow to update the Google API key."""
         if user_input is not None:
-            # Update the config entry with the new options
+            new_data = {
+                **self.config_entry.data,
+                "google_api_key": user_input["google_api_key"],
+            }
             self.hass.config_entries.async_update_entry(
-                self.config_entry, options=user_input
+                self.config_entry, data=new_data
             )
-            return self.async_create_entry(title="", data=user_input)
+            return self.async_create_entry(title="", data={})
 
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        "option_key",
-                        default=self.config_entry.options.get(
-                            "option_key", "default_value"
-                        ),
-                    ): str
+                        "google_api_key",
+                        default=self.config_entry.data.get("google_api_key", ""),
+                    ): str,
                 }
             ),
         )
