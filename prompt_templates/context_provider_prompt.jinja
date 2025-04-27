@@ -1,77 +1,8 @@
-### 🧠 Knowledge Management Functions (Intents)
+{# context_provider_prompt.jinja #}
 
-You can use the following **intents** to manage and expand the knowledge base:
-
----
-
-#### 📚 `LoadTopicFacts`
-Load one or more chunks of factual knowledge for a given topic or topics.
-
-- **Slot:** `topic` – one or more topic identifiers (e.g., `"boiler"`, `"energy"`, `"air_conditioning"`)
-
-#### ➕ `InsertFact`
-Insert a new fact into an existing topic.
-
-- **Slots:**
-  - `topic`: the target topic
-  - `fact`: the new fact to add
-
-#### 📝 `EditFact`
-Edit (modify) an existing fact in a topic.
-
-- **Slots:**
-  - `topic`: the target topic
-  - `original_fact`: the original fact to be replaced
-  - `updated_fact`: the new version of the fact
-
-#### 🗑️ `DeleteFact`
-Delete a fact from a topic.
-
-- **Slots:**
-  - `topic`: the target topic
-  - `fact`: the fact to delete
-
-#### 🌟 `CreateTopic`
-Create a new topic if the user introduces knowledge that does not fit into any existing topic.
-
-- **Slots:**
-  - `topic`: the new topic name
-  - `summary`: a short description of the topic (in Hungarian)
-  - `keywords`: a list of keywords (in Hungarian)
-
-#### 🗑️ `DeleteTopic`
-Delete an entire topic (metadata and facts).
-
-- **Slots:**
-  - `topic`: the topic identifier to delete
-
----
-
-### 🧩 Decision Making Guide
-
-- 🆕 **If the information is new within an existing topic:** use `InsertFact`.
-- ✏️ **If the information updates an existing fact:** use `EditFact`.
-- ❌ **If the information deletes a fact:** use `DeleteFact`.
-- 🌟 **If the information creates a completely new topic:** use `CreateTopic`.
-- 🗑️ **If a topic needs to be completely removed:** use `DeleteTopic`.
-
-Always try to choose the correct intent based on the user's request.
-
----
-
-### 📂 Available Topics
-{% set topics = state_attr('sensor.context_provider_topics', 'topics') %}
-{% if topics %}
-{% for topic_id, topic_info in topics.items() %}
-- **{{ topic_id }}**: {{ topic_info.summary | default("No summary.") }}{% if topic_info.keywords %}
-  _Keywords: {{ topic_info.keywords | join(", ") }}_{% endif %}
-{% if topic_info.pending_changes is defined and topic_info.pending_changes %}
-  _Pending Changes:_
-{% for change in topic_info.pending_changes %}
-  - {{ change.type | capitalize }}: {% if change.type == "edit" %}"{{ change.original }}" → "{{ change.updated }}"{% else %}"{{ change.fact }}"{% endif %}
-{% endfor %}
-{% endif %}
-{% endfor %}
-{% else %}
-_No available topics._
-{% endif %}
+{% include 'context_provider/intents.jinja' %}
+{% include 'context_provider/decision_guide.jinja' %}
+{% include 'context_provider/available_topics.jinja' %}
+{% include 'context_provider/slot_extraction.jinja' %}
+{% include 'context_provider/propose_new_topic.jinja' %}
+{% include 'context_provider/capture_pending_fact.jinja' %}

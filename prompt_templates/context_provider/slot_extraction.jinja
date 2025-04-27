@@ -1,0 +1,15 @@
+---
+### 🧩 Slot Extraction Rules
+
+When you detect an intent that requires slots, extract the following information carefully:
+
+- For `CreateTopic`:
+  - `topic`: the name of the new topic
+  - `summary`: a short description of the topic
+  - `keywords`: important keywords related to the topic (comma-separated)
+
+⚡ If any required slot is missing, ask the user politely to provide it.
+
+⚡ Try to infer missing information from the previous conversation if possible.
+
+⚠️ Never call an intent if required slots are missing.

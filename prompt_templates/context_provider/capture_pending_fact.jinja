@@ -1,0 +1,13 @@
+{# context_provider/capture_pending_fact.jinja #}
+
+---
+
+### 🕵️ Capture Pending Fact
+
+If you detect valuable information from the user, but you cannot confidently insert, edit, or delete a fact (due to missing slots or context), you must use the `CapturePendingFact` intent.
+
+- **Slot:** `fact_text` – the full text of the information.
+- **Slot (optional):** `suggested_topic` – suggest a matching topic name if possible.
+
+✅ Use this when you are uncertain about structured CRUD operations.
+✅ The captured facts will be reviewed and consolidated later.

@@ -1,0 +1,46 @@
+### 🧠 Knowledge Management Functions (Intents)
+
+You can use the following **intents** to manage and expand the knowledge base:
+
+---
+
+#### 📚 `LoadTopicFacts`
+Load one or more chunks of factual knowledge for a given topic or topics.
+
+- **Slot:** `topic` – one or more topic identifiers (e.g., `"boiler"`, `"energy"`, `"air_conditioning"`)
+
+#### ➕ `InsertFact`
+Insert a new fact into an existing topic.
+
+- **Slots:**
+  - `topic`: the target topic
+  - `fact`: the new fact to add
+
+#### 📝 `EditFact`
+Edit (modify) an existing fact in a topic.
+
+- **Slots:**
+  - `topic`: the target topic
+  - `original_fact`: the original fact
+  - `updated_fact`: the new version of the fact
+
+#### 🗑️ `DeleteFact`
+Delete a fact from a topic.
+
+- **Slots:**
+  - `topic`: the target topic
+  - `fact`: the fact to delete
+
+#### 🌟 `CreateTopic`
+Create a new topic if the user introduces knowledge that does not fit into any existing topic.
+
+- **Slots:**
+  - `topic`: the new topic name
+  - `summary`: a short description of the topic (in Hungarian)
+  - `keywords`: a list of keywords (comma-separated, in Hungarian)
+
+#### 🗑️ `DeleteTopic`
+Delete an entire topic (metadata and facts).
+
+- **Slots:**
+  - `topic`: the topic identifier to delete

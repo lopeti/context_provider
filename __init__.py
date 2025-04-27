@@ -1,5 +1,6 @@
 import logging
 import os
+import filecmp
 import shutil
 from pathlib import Path
 
@@ -98,12 +99,25 @@ async def async_setup_intents(hass):
 
 
 async def copy_prompt_template(hass):
-    """Másolja a prompt Jinja sablont a Home Assistant custom_templates könyvtárába."""
-    source = (
-        Path(__file__).parent / "prompt_templates" / "context_provider_prompt.jinja"
-    )
+    """Copy the prompt templates to Home Assistant's custom_templates directory."""
+    source_dir = Path(__file__).parent / "prompt_templates"
     target_dir = Path(hass.config.path("custom_templates"))
-    target_file = target_dir / "context_provider_prompt.jinja"
 
+    # Copy the main jinja file separately
+    source_main = source_dir / "context_provider_prompt.jinja"
+    target_main = target_dir / "context_provider_prompt.jinja"
     target_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(source, target_file)
+
+    if not target_main.exists() or not filecmp.cmp(
+        source_main, target_main, shallow=False
+    ):
+        shutil.copyfile(source_main, target_main)
+
+    # Copy the context_provider subfolder
+    source_context_dir = source_dir / "context_provider"
+    target_context_dir = target_dir / "context_provider"
+
+    if target_context_dir.exists():
+        shutil.rmtree(target_context_dir)
+
+    shutil.copytree(source_context_dir, target_context_dir)

@@ -1,0 +1,12 @@
+---
+### 📂 Available Topics
+
+{% set topics = state_attr('sensor.context_provider_topics', 'topics') %}
+{% if topics %}
+{% for topic_id, info in topics.items() %}
+- **{{ topic_id }}**: {{ info.summary | trim | default("No summary available.") }}
+  {% if info.keywords %}_Keywords: {{ info.keywords | join(", ") }}_{% endif %}
+{% endfor %}
+{% else %}
+_No available topics._
+{% endif %}
