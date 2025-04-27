@@ -1,42 +1,77 @@
----
+### 🧠 Knowledge Management Functions (Intents)
 
-### 🧠 Tudáskezelési funkciók (Intents)
-
-Az alábbi célokra használhatsz különféle **intents**-t, hogy tudást tölts be, vagy új tényt rögzíts:
+You can use the following **intents** to manage and expand the knowledge base:
 
 ---
 
-#### 📚 `ProvideTopicFacts`
+#### 📚 `LoadTopicFacts`
+Load one or more chunks of factual knowledge for a given topic or topics.
 
-Témaalapú tudás betöltése. Egy adott témához tartozó statikus tudás chunkot ad vissza.
+- **Slot:** `topic` – one or more topic identifiers (e.g., `"boiler"`, `"energy"`, `"air_conditioning"`)
 
-- **Slot:** `topic` – a témakör azonosítója (pl. `"boiler"`, `"energy"`, `"air_conditioning"`)
+#### ➕ `InsertFact`
+Insert a new fact into an existing topic.
 
-#### ✍️ `RecognizeNewFact`
+- **Slots:**
+  - `topic`: the target topic
+  - `fact`: the new fact to add
 
-Új tény felismerése egy beszélgetés során. A rendszer automatikusan frissíti a megfelelő `.md` fájlt.
+#### 📝 `EditFact`
+Edit (modify) an existing fact in a topic.
 
-- **Slotok:**
-  - `topic`: a tudásfájl azonosítója
-  - `fact`: a felismerendő új ismeret
+- **Slots:**
+  - `topic`: the target topic
+  - `original_fact`: the original fact to be replaced
+  - `updated_fact`: the new version of the fact
+
+#### 🗑️ `DeleteFact`
+Delete a fact from a topic.
+
+- **Slots:**
+  - `topic`: the target topic
+  - `fact`: the fact to delete
+
+#### 🌟 `CreateTopic`
+Create a new topic if the user introduces knowledge that does not fit into any existing topic.
+
+- **Slots:**
+  - `topic`: the new topic name
+  - `summary`: a short description of the topic (in Hungarian)
+  - `keywords`: a list of keywords (in Hungarian)
+
+#### 🗑️ `DeleteTopic`
+Delete an entire topic (metadata and facts).
+
+- **Slots:**
+  - `topic`: the topic identifier to delete
 
 ---
 
-### 📂 Elérhető témák
+### 🧩 Decision Making Guide
 
+- 🆕 **If the information is new within an existing topic:** use `InsertFact`.
+- ✏️ **If the information updates an existing fact:** use `EditFact`.
+- ❌ **If the information deletes a fact:** use `DeleteFact`.
+- 🌟 **If the information creates a completely new topic:** use `CreateTopic`.
+- 🗑️ **If a topic needs to be completely removed:** use `DeleteTopic`.
+
+Always try to choose the correct intent based on the user's request.
+
+---
+
+### 📂 Available Topics
 {% set topics = state_attr('sensor.context_provider_topics', 'topics') %}
 {% if topics %}
-  {% for topic_id, info in topics.items() %}
-- **{{ topic_id }}**: {{ info.summary | trim | default("Nincs összefoglaló.") }}
-  {% if info.keywords %}_Kulcsszavak: {{ info.keywords | join(", ") }}_{% endif %}
-  {% endfor %}
-{% else %}
-_Nincs elérhető téma._
+{% for topic_id, topic_info in topics.items() %}
+- **{{ topic_id }}**: {{ topic_info.summary | default("No summary.") }}{% if topic_info.keywords %}
+  _Keywords: {{ topic_info.keywords | join(", ") }}_{% endif %}
+{% if topic_info.pending_changes is defined and topic_info.pending_changes %}
+  _Pending Changes:_
+{% for change in topic_info.pending_changes %}
+  - {{ change.type | capitalize }}: {% if change.type == "edit" %}"{{ change.original }}" → "{{ change.updated }}"{% else %}"{{ change.fact }}"{% endif %}
+{% endfor %}
 {% endif %}
-
----
-
-### 🧩 Használat
-
-- Használj tudásalapú válaszokat, ha felismered a témát.
-- Ha nem tudsz válaszolni, hívj meg egy intentet.
+{% endfor %}
+{% else %}
+_No available topics._
+{% endif %}

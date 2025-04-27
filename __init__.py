@@ -12,6 +12,7 @@ from .const import DOMAIN
 from .prompt_builder import build_prompt_context
 from .helpers.rendered_output import write_rendered_topics_md
 
+
 _LOGGER = logging.getLogger(__name__)
 
 

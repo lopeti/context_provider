@@ -1,8 +1,11 @@
 from homeassistant.helpers.intent import IntentHandler, async_register
-from .provide_topic_facts import ProvideTopicFactsIntent
+from .load_topic_facts import LoadTopicFactsIntentHandler
 from .list_topics import ListTopicsIntent  # Import ListTopicsIntent from its module
 from .write_topic import WriteTopicIntent
 from .recognize_new_fact import RecognizeNewFactIntent
+from .insert_fact import InsertFactIntentHandler
+from .edit_fact import EditFactIntentHandler
+from .delete_fact import DeleteFactIntentHandler
 import logging
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,9 +24,14 @@ class DummyIntent(IntentHandler):
 async def async_register_intents(hass):
     _LOGGER.debug("Registering intents")
     # async_register(hass, DummyIntent())
-    async_register(hass, ProvideTopicFactsIntent())
     async_register(hass, ListTopicsIntent())
     async_register(hass, RecognizeNewFactIntent())
+
+    # fact crud intents
+    async_register(hass, InsertFactIntentHandler())
+    async_register(hass, LoadTopicFactsIntentHandler())
+    async_register(hass, EditFactIntentHandler())
+    async_register(hass, DeleteFactIntentHandler())
     _LOGGER.debug("Intents registered successfully")
 
 

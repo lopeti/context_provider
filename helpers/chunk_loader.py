@@ -5,7 +5,7 @@ import os
 from typing import Optional
 
 from .markdown_utils import split_frontmatter
-from .async_file_io import async_read_file
+from .async_file_io import search_topic_file, async_read_file, load_all_topic_filenames
 
 _keyword_cache: dict[str, str] | None = None
 
@@ -80,36 +80,6 @@ async def load_topic(input_topic: str) -> Optional[dict]:
         }
     except Exception:
         return None
-
-
-async def search_topic_file(topic: str) -> Optional[str]:
-    base_dir = os.path.dirname(__file__)
-    folders = ["../data", "../data/custom"]
-    for folder in folders:
-        path = os.path.normpath(os.path.join(base_dir, folder, f"{topic}.md"))
-        if os.path.isfile(path):
-            return path
-    return None
-
-
-async def load_all_topic_filenames() -> list[str]:
-    base_dir = os.path.dirname(__file__)
-    folders = ["../data", "../data/custom"]
-    result = set()
-
-    for folder in folders:
-        folder_path = os.path.normpath(os.path.join(base_dir, folder))
-        try:
-            files = await asyncio.get_running_loop().run_in_executor(
-                None, lambda: os.listdir(folder_path)
-            )
-            for f in files:
-                if f.endswith(".md"):
-                    result.add(f.replace(".md", ""))
-        except Exception:
-            continue
-
-    return sorted(result)
 
 
 def invalidate_keyword_cache():

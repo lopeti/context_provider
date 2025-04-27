@@ -2,6 +2,7 @@
 
 import asyncio
 import anyio
+import yaml
 from pathlib import Path
 
 from .chunk_loader import search_topic_file
@@ -29,19 +30,22 @@ async def load_all_topic_filenames() -> list[str]:
 
 
 async def load_topic_meta(topic: str) -> dict | None:
-    """Return frontmatter metadata only for the given topic."""
-    path = await search_topic_file(topic)
-    if not path:
-        return None
+    """Return metadata from the topic's YAML file."""
+    base_dir = Path(__file__).parent
+    folders = [base_dir / "../data", base_dir / "../data/custom"]
 
-    try:
-        async with await anyio.open_file(path, encoding="utf-8") as f:
-            content = await f.read()
-        meta, _ = split_frontmatter(content)
-    except FileNotFoundError:
-        return None
-    else:
-        return meta
+    for folder in folders:
+        yaml_path = (folder / f"{topic}.yaml").resolve()
+        if yaml_path.exists():
+            try:
+                async with await anyio.open_file(yaml_path, encoding="utf-8") as f:
+                    content = await f.read()
+                meta = yaml.safe_load(content)
+                return meta
+            except Exception:
+                return None
+
+    return None
 
 
 async def load_topic_summary_keywords(topic: str) -> tuple[str, list[str]] | None:

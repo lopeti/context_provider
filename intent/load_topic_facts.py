@@ -1,4 +1,4 @@
-# Home Assistant intent handler: ProvideTopicFacts
+# Home Assistant intent handler: LoadTopicFacts
 # Slot: topic (e.g. "energy", "boiler", "air_quality")
 # Loads the contents of facts/<topic>.txt and returns it as speech
 # Uses alias and fuzzy match if needed, and returns context-aware message
@@ -17,8 +17,8 @@ from ..helpers.intent_helpers import (
 )
 
 
-class ProvideTopicFactsIntent(IntentHandler):
-    intent_type = "ProvideTopicFacts"
+class LoadTopicFactsIntentHandler(IntentHandler):
+    intent_type = "LoadTopicFacts"
     slot_schema = {"topic": SLOT_SCHEMA_STR}
 
     async def async_handle(self, intent_obj):

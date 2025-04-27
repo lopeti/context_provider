@@ -6,10 +6,10 @@ def render_topics_markdown(topics: dict) -> str:
     """Render the topic list as a markdown document."""
     lines = ["### 📚 Available Topics\n"]
     for topic, info in topics.items():
-        label = info.get("label", topic)
-        aliases = info.get("aliases", [])
-        alias_str = ", ".join(aliases) if aliases else "–"
-        lines.append(f"- `{topic}` ({label}) — aliases: {alias_str}")
+        summary = info.get("summary", "No summary available.")
+        keywords = info.get("keywords", [])
+        keywords_str = ", ".join(keywords) if keywords else "–"
+        lines.append(f"- **{topic}**: {summary}\n  _Keywords: {keywords_str}_")
     return "\n".join(lines)
 
 
